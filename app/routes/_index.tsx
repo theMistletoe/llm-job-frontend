@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export const meta: MetaFunction = () => {
   return [
@@ -56,6 +57,7 @@ export default function Index() {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        toast.success("Deployed successfully!");
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -65,11 +67,25 @@ export default function Index() {
       });
   };
 
+  const LoadingDots = () => {
+    const [dots, setDots] = useState('.');
+  
+    useEffect(() => {
+      const intervalId = setInterval(() => {
+        setDots(dots => dots.length < 3 ? dots + '.' : '.');
+      }, 500); // 500ms間隔で点を追加
+  
+      return () => clearInterval(intervalId); // コンポーネントのアンマウント時にタイマーをクリア
+    }, []);
+  
+    return <span>{dots}</span>;
+  };
+
   const LoadingSpinner = () => (
     <div className="flex flex-col justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
       <div className="mt-8">
-        <p className="text-2xl font-bold text-blue-500">Wait for Code Generating...</p>
+        <p className="text-2xl font-bold text-blue-500">Wait for Code Generating <LoadingDots /></p>
       </div>
     </div>
   );
