@@ -126,6 +126,7 @@ export default function Index() {
                     href="https://developers.cloudflare.com/workers/configuration/cron-triggers/"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="text-blue-500 cursor-pointer mt-2 underline hover:text-blue-700"
                   >
                     ※ Cron Time Format
                   </a>
