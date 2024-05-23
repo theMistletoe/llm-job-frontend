@@ -21,12 +21,12 @@ export default function Index() {
   const handleClickGenerate = () => {
     setPageState("customizing");
     setLoadingGenerating(true);
-    fetch("https://aisample.apimistletoe.workers.dev", {
+    fetch("https://aicron.apimistletoe.workers.dev/ai/script", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userinput:input }),
+      body: JSON.stringify({ reqiurements:input }),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -44,14 +44,13 @@ export default function Index() {
   const handleClickDeploy = () => {
 
     setLoadingDeploying(true);
-    fetch("https://make-cron-job-cloudflare.apimistletoe.workers.dev", {
-      method: "POST",
+    fetch("https://aicron.apimistletoe.workers.dev/workers/scripts", {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ 
-        codeConetnts: generateCode,
-        cronInfo: `[{"cron": "${cronTime}"}]`,
+        codeConetnts: generateCode
        }),
     })
       .then((response) => response.json())
