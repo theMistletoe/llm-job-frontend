@@ -10,7 +10,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const [input, setInput] = useState<string>("Please log three trending news items from https://news.yahoo.co.jp/rss/topics/top-picks.xml for today's Japan.");
+  const [input, setInput] = useState<string>("Please send email three trending news items from https://news.yahoo.co.jp/rss/topics/top-picks.xml for today's Japan.\n\nemail address: ~~~");
   const [pageState, setPageState] = useState<"init"|"customizing">("init");
   const [generateCode, setGenerateCode] = useState<string>("");
   const [loadingGenerating, setLoadingGenerating] = useState<boolean>(false);
@@ -50,7 +50,8 @@ export default function Index() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ 
-        codeConetnts: generateCode
+        codeConetnts: generateCode,
+        cronInfo: cronTime
        }),
     })
       .then((response) => response.json())
