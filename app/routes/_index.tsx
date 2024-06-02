@@ -18,27 +18,24 @@ export default function Index() {
   const [loadingDeploying, setLoadingDeploying] = useState<boolean>(false);
   const [cronTime, setCronTime] = useState<string>("*/5 * * * *");
 
-  const handleClickGenerate = () => {
-    setPageState("customizing");
-    setLoadingGenerating(true);
-    fetch("https://aicron.apimistletoe.workers.dev/ai/script", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ reqiurements:input }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setGenerateCode(data.generateCode);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      })
-      .finally(() => {
-        setLoadingGenerating(false);
+  const handleClickGenerate = async () => {
+    try {
+      setPageState("customizing");
+      setLoadingGenerating(true);
+      const result = await fetch("https://aicron.apimistletoe.workers.dev/ai/script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reqiurements:input }),
       });
+      const data = await result.json();
+      setGenerateCode(data.generateCode);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoadingGenerating(false);
+    }
   };
 
   const handleClickDeploy = () => {
