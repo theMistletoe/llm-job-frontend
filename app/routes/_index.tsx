@@ -10,10 +10,12 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const [input, setInput] = useState<string>("Please send email three trending news items from https://news.yahoo.co.jp/rss/topics/top-picks.xml for today's Japan.\n\nemail address: ~~~");
+  const [input, setInput] = useState<string>("Please send email three trending news items from https://news.yahoo.co.jp/rss/topics/top-picks.xml for today's Japan.");
   const [pageState, setPageState] = useState<"init"|"customizing">("init");
   const [generateCode, setGenerateCode] = useState<string>("");
   const [loadingGenerating, setLoadingGenerating] = useState<boolean>(false);
+  const [keys, setKeys] = useState<string[]>([]);
+  const [formValues, setFormValues] = useState<{ [key: string]: string }>({});
 
   const [loadingDeploying, setLoadingDeploying] = useState<boolean>(false);
   const [cronTime, setCronTime] = useState<string>("*/5 * * * *");
@@ -31,6 +33,18 @@ export default function Index() {
       });
       const data = await result.json();
       setGenerateCode(data.generateCode);
+
+      const res = await fetch("https://aicron.apimistletoe.workers.dev/ai/maskedscript", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputCode:data.generateCode }),
+      });
+      const maskeddata = await res.json();
+      console.log(JSON.parse(maskeddata.result));
+      setGenerateCode(JSON.parse(maskeddata.result).modified_code);
+      setKeys(JSON.parse(maskeddata.result).secret_env_names);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -48,7 +62,8 @@ export default function Index() {
       },
       body: JSON.stringify({ 
         codeConetnts: generateCode,
-        cronInfo: cronTime
+        cronInfo: cronTime,
+        secretKeyVars: formValues,
        }),
     })
       .then((response) => response.json())
@@ -76,6 +91,13 @@ export default function Index() {
     }, []);
   
     return <span>{dots}</span>;
+  };
+
+  const handleChange = (key: string, value: string) => {
+    setFormValues(prevValues => ({
+      ...prevValues,
+      [key]: value
+    }));
   };
 
   const LoadingSpinner = () => (
@@ -126,7 +148,7 @@ export default function Index() {
                   className="w-full h-96 text-lg p-2 rounded-md border-2 border-gray-300 mt-5"
                 />
               </div>
-              <div>
+              <div className="w-2/5 ml-8">
                 <h2 className="text-xl">Cron Time</h2>
                 <input
                   value={cronTime}
@@ -143,6 +165,22 @@ export default function Index() {
                   >
                     ※ Cron Time Format
                   </a>
+                </div>
+                <div className="mt-16">
+                  <h2 className="text-xl">Set secret env vars</h2>
+                  {keys.map(key => (
+                    <div key={key}>
+                      <label>
+                        {key}:
+                        <input
+                          type="text"
+                          value={formValues[key] || ''}
+                          onChange={(e) => handleChange(key, e.target.value)}
+                          className="text-lg p-2 rounded-md border-2 border-gray-300 mt-5"
+                        />
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
