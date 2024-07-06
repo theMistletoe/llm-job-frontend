@@ -44,7 +44,13 @@ export default function Workers() {
             <ul className="space-y-2">
                 {workers.length > 0 ? (
                     workers.map((worker, index) => (
-                        <div tabIndex={index} role="button" key={worker.id} className="p-3 bg-gray-100 rounded-md shadow-md" onClick={() => setSelectedWorker(worker)} onKeyDown={(e) => {
+                        <div 
+                            tabIndex={index}
+                            role="button"
+                            key={worker.id}
+                            className="p-3 bg-gray-100 rounded-md shadow-md"
+                            onClick={() => setSelectedWorker(worker)}
+                            onKeyDown={(e) => {
                             if (e.key === "Enter") setSelectedWorker(worker);
                             }}>
                                 {worker.script_name}
