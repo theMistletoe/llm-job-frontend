@@ -1,8 +1,8 @@
 import { SignIn, SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
 import type { MetaFunction } from "@remix-run/node";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import CustomizeCronJob from "~/features/worker/CustomizeWorker";
+import { useDeployWorker } from "~/features/worker/hooks/useDeployWorker";
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,8 +19,8 @@ export default function Index() {
   const [keys, setKeys] = useState<string[]>([]);
   const [formValues, setFormValues] = useState<{ [key: string]: string }>({});
 
-  const [loadingDeploying, setLoadingDeploying] = useState<boolean>(false);
   const [cronTime, setCronTime] = useState<string>("*/5 * * * *");
+  const { createDeploy, loadingDeploying } = useDeployWorker();
 
   const { getToken } = useAuth();
 
@@ -58,31 +58,8 @@ export default function Index() {
     }
   };
 
-  const handleClickDeploy = async () => {
-
-    setLoadingDeploying(true);
-    try {
-      const result = await fetch("https://aicron.apimistletoe.workers.dev/workers/scripts", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await getToken()}`,
-        },
-        body: JSON.stringify({ 
-          codeConetnts: generateCode,
-          cronInfo: cronTime,
-          secretKeyVars: formValues,
-         }),
-      });
-      const data = await result.json();
-      console.log(data);
-      toast.success("Deployed successfully!");
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Deploy failed!");
-    } finally {
-      setLoadingDeploying(false);
-    }
+  const handleClickDeploy = () => {
+    createDeploy(generateCode, cronTime, formValues);
   };
 
   const LoadingDots = () => {
