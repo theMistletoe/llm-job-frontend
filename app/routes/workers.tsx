@@ -11,10 +11,6 @@ export default function Workers() {
     const [editedCron, setEditedCron] = useState<string | undefined>(undefined);
     const [editedSecretValues, setEditedSecretValues] = useState<{ [key: string]: string } | undefined>(undefined);
 
-    const handleChangeSecretValues = (key: string, value: string) => {
-        setEditedSecretValues((prev) => ({...prev, [key]: value}));
-    };
-
     const secretValues = useCallback(() => {
         if (editedSecretValues) return editedSecretValues;
         if (workerInfo?.settings.bindings) {
@@ -49,6 +45,10 @@ export default function Workers() {
 
     const handleChangeCron = (cron: string) => {
         setEditedCron(cron);
+    };
+
+    const handleChangeSecretValues = (key: string, value: string) => {
+        setEditedSecretValues((prev) => ({...prev, [key]: value}));
     };
 
     return selectedWorker && workerInfo ? (
