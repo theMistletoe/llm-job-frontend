@@ -79,6 +79,7 @@ export default function Index() {
       toast.success("Deployed successfully!");
     } catch (error) {
       console.error("Error:", error);
+      toast.error("Deploy failed!");
     } finally {
       setLoadingDeploying(false);
     }
