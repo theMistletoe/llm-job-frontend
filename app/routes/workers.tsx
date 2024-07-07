@@ -9,6 +9,22 @@ export default function Workers() {
     const {workerInfo, getWorkerInfo} = useWorkerInfo();
     const [editedCode, setEditedCode] = useState<string | undefined>(undefined);
     const [editedCron, setEditedCron] = useState<string | undefined>(undefined);
+    const [editedSecretValues, setEditedSecretValues] = useState<{ [key: string]: string } | undefined>(undefined);
+
+    const handleChangeSecretValues = (key: string, value: string) => {
+        setEditedSecretValues((prev) => ({...prev, [key]: value}));
+    };
+
+    const secretValues = useCallback(() => {
+        if (editedSecretValues) return editedSecretValues;
+        if (workerInfo?.settings.bindings) {
+            return workerInfo.settings.bindings.reduce((acc: { [key: string]: string }, binding) => {
+                acc[binding.name] = "(filtered)";
+                return acc;
+            }, {});
+        }
+        return {};
+    }, [editedSecretValues, workerInfo?.settings.bindings]);
 
     const code = useCallback(() => {
         return editedCode || workerInfo?.code || "";
@@ -43,10 +59,8 @@ export default function Workers() {
                 cronTime={cron()}
                 onChangeCronTime={handleChangeCron}
                 keys={keys()}
-                secretValues={{}}
-                onChangeSecretValues={function (key: string, value: string): void {
-                    throw new Error("Function not implemented.");
-                }}
+                secretValues={secretValues()}
+                onChangeSecretValues={handleChangeSecretValues}
                 onClickDeploy={function (): void {
                     throw new Error("Function not implemented.");
                 }}
