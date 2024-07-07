@@ -18,6 +18,10 @@ export default function Workers() {
         return editedCron || workerInfo?.schedules[0].cron || "";
     }, [editedCron, workerInfo?.schedules]);
 
+    const keys = useCallback(() => {
+        return workerInfo?.settings.bindings.map((binding) => binding.name) || [];
+    }, [workerInfo?.settings.bindings]);
+
     const handleSelectWorker = async (worker: Worker) => {
         setSelectedWorker(worker);
         await getWorkerInfo(worker.id);
@@ -38,7 +42,7 @@ export default function Workers() {
                 onChangeCode={handleChangeCode}
                 cronTime={cron()}
                 onChangeCronTime={handleChangeCron}
-                keys={[]}
+                keys={keys()}
                 secretValues={{}}
                 onChangeSecretValues={function (key: string, value: string): void {
                     throw new Error("Function not implemented.");
