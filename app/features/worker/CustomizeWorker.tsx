@@ -1,6 +1,7 @@
 import React from "react";
 
 type CustomizeWorkerProps = {
+    workerName?: string;
     generateCode: string;
     onChangeCode: (code: string) => void;
     cronTime: string;
@@ -13,6 +14,7 @@ type CustomizeWorkerProps = {
 }
 
 const CustomizeWorker: React.FC<CustomizeWorkerProps> = ({
+  workerName,
   generateCode,
   onChangeCode,
   cronTime,
@@ -25,6 +27,7 @@ const CustomizeWorker: React.FC<CustomizeWorkerProps> = ({
 }) => {
   return (
     <div className="m-5">
+      {workerName && <h1 className="text-2xl">Worker Name: {workerName}</h1>}
       <div className="flex flex-col justify-center items-center w-full">
         <div>
           <h1 className="text-2xl">Customize your cron job</h1>

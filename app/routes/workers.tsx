@@ -1,4 +1,6 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useState } from "react";
+import toast from "react-hot-toast";
 import CustomizeWorker from "~/features/worker/CustomizeWorker";
 import { useWorkerInfo } from "~/features/worker/hooks/useWorkerInfo";
 import { useWorkers, Worker } from "~/features/worker/hooks/useWorkers";
@@ -10,6 +12,8 @@ export default function Workers() {
     const [editedCode, setEditedCode] = useState<string | undefined>(undefined);
     const [editedCron, setEditedCron] = useState<string | undefined>(undefined);
     const [editedSecretValues, setEditedSecretValues] = useState<{ [key: string]: string } | undefined>(undefined);
+
+    const { getToken } = useAuth();
 
     const secretValues = useCallback(() => {
         if (editedSecretValues) return editedSecretValues;
@@ -51,9 +55,76 @@ export default function Workers() {
         setEditedSecretValues((prev) => ({...prev, [key]: value}));
     };
 
+    // editedCodeが元のコードから編集されているかどうかを判定する関数
+    const isEditedCode = () => {
+        if (!editedCode || !workerInfo?.code) return false;
+        return editedCode !== workerInfo?.code;
+    };
+
+    const isEditedCron = () => {
+        if (!editedCron || !workerInfo?.schedules[0].cron) return false;
+        return editedCron !== workerInfo?.schedules[0].cron;
+    };
+
+    const isEditedSecretValues = () => {
+        if (!editedSecretValues || !workerInfo?.settings.bindings) return false;
+        const originalValues = workerInfo.settings.bindings.reduce((acc: { [key: string]: string }, binding) => {
+            acc[binding.name] = "(filtered)";
+            return acc;
+        }, {});
+        return JSON.stringify(editedSecretValues) !== JSON.stringify(originalValues);
+    };
+
+    const handleClickDeploy = async () => {
+        if (!selectedWorker) {
+            toast.error("No worker selected!");
+            return;
+        }
+
+        if (!isEditedCode() && !isEditedCron() && !isEditedSecretValues()) {
+            toast.error("No changes to deploy!");
+            return;
+        }
+
+        const url = `https://aicron.apimistletoe.workers.dev/workers/${selectedWorker?.id}`;
+        const body: { codeContents?: string, cronInfo?: string, secretKeyVars?: { [key: string]: string } } = {};
+        if (isEditedCode()) {
+            body.codeContents = code();
+        }
+        if (isEditedCron()) {
+            body.cronInfo = cron();
+        }
+        if (isEditedSecretValues()) {
+            body.secretKeyVars = secretValues();
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${await getToken()}`,
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            console.log('Success:', responseData);
+            toast.success("Worker has been deployed!");
+        } catch (error) {
+            console.error('Failed to update worker:', error);
+            toast.error("Failed to deploy worker!");
+        }
+    }
+
     return selectedWorker && workerInfo ? (
         <div>
             <CustomizeWorker
+                workerName={selectedWorker.script_name}
                 generateCode={code()}
                 onChangeCode={handleChangeCode}
                 cronTime={cron()}
@@ -61,9 +132,7 @@ export default function Workers() {
                 keys={keys()}
                 secretValues={secretValues()}
                 onChangeSecretValues={handleChangeSecretValues}
-                onClickDeploy={function (): void {
-                    throw new Error("Function not implemented.");
-                }}
+                onClickDeploy={handleClickDeploy}
                 loadingDeploying={false}
             />
         </div>

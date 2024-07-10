@@ -120,6 +120,7 @@ export default function Index() {
         )}
         {pageState === "customizing" && (
           <CustomizeCronJob
+            workerName="New Worker"
             generateCode={generateCode}
             onChangeCode={setGenerateCode}
             cronTime={cronTime}
