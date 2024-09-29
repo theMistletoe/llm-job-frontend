@@ -11,6 +11,7 @@ type CustomizeWorkerProps = {
     onChangeSecretValues: (key: string, value: string) => void;
     onClickDeploy: () => void;
     loadingDeploying: boolean;
+    onClickDelete?: () => void;
 }
 
 const CustomizeWorker: React.FC<CustomizeWorkerProps> = ({
@@ -24,6 +25,7 @@ const CustomizeWorker: React.FC<CustomizeWorkerProps> = ({
   onChangeSecretValues,
   onClickDeploy,
   loadingDeploying,
+  onClickDelete,
 }) => {
   return (
     <div className="m-5">
@@ -89,6 +91,16 @@ const CustomizeWorker: React.FC<CustomizeWorkerProps> = ({
             )}
           </button>
         </div>
+        {onClickDelete && (
+          <div>
+            <button
+              className="px-5 py-2 text-lg font-bold text-white bg-red-500 border-none rounded-md cursor-pointer mt-5"
+              onClick={onClickDelete}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

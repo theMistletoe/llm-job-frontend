@@ -1,8 +1,7 @@
-
-
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { Worker } from "~/features/worker/hooks/useWorkers";
+import { useNavigate } from "@remix-run/react";
 
 
 type Code = string;
@@ -39,11 +38,12 @@ export type WorkerInfo = {
 };
 
 
-export const useWorkerInfo = () => {
+export const useWorkerInfo = (workerId: string | undefined) => {
     const [workerInfo, setWorkerInfo] = useState<WorkerInfo | undefined>(undefined);
     const { getToken } = useAuth();
+    const navigate = useNavigate();
 
-    const getWorkerInfo = async (workerId: string) => {
+    const getWorkerInfo = useCallback(async () => {
         if (!workerId) {
             setWorkerInfo(undefined);
             return;
@@ -68,7 +68,26 @@ export const useWorkerInfo = () => {
             console.error("Failed to fetch workers:", error);
             setWorkerInfo(undefined);
         }
+    }, [workerId, getToken]);
+
+    useEffect(() => {
+        getWorkerInfo();
+    }, [getWorkerInfo, workerId]);
+
+    const deleteWorker = async (workerId: string) => {
+        const token = await getToken();
+        const response = await fetch(`https://aicron.apimistletoe.workers.dev/workers/${workerId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        setWorkerInfo(undefined);
+        navigate("/workers");
     };
 
-    return {workerInfo, getWorkerInfo};
+    return {workerInfo, deleteWorker};
 };
